@@ -13,4 +13,4 @@
 .externalNativeBuild
 .cxx
 local.properties
-.google_maps_api
+/debug
