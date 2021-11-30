@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button minknap;
     TextView hello;
     Button minknap2;
+    Button minknap3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +26,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         minknap2 = findViewById(R.id.button2);
         minknap2.setOnClickListener(this);
 
+        minknap3 = findViewById(R.id.button3);
+        minknap3.setOnClickListener(this);
+
         hello = findViewById(R.id.textView);
 
 
@@ -36,8 +40,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(v == minknap){
             startActivity(new Intent(MainActivity.this, MapsActivity.class));
         }else if(v == minknap2){
-            System.out.println("klik");
             hello.setText("hej med dig");
+        }else if(v == minknap3){
+            startActivity(new Intent(MainActivity.this, Settings.class));
         }
     }
 }
