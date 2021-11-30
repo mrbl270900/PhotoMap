@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }else if(v == minknap2){
             hello.setText("hej med dig");
         }else if(v == minknap3){
-            startActivity(new Intent(MainActivity.this, Settings.class));
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
         }
     }
 }
