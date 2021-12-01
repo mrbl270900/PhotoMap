@@ -9,10 +9,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
@@ -48,5 +49,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng RUC = new LatLng(55.652330724, 12.137999448);
         mMap.addMarker(new MarkerOptions().position(RUC).title("Marker ved RUC"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RUC, zoomLevel));
+        mMap.setOnMarkerClickListener(this);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14.0f));
+        return false;
     }
 }
