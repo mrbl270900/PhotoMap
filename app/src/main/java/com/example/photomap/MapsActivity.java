@@ -2,6 +2,7 @@ package com.example.photomap;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
@@ -66,7 +67,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         private void render(Marker marker, View view) {
             int badge = 0;
             // Use the equals() method on a Marker to check for equals.  Do not use ==.
-            if (marker.equals(RUC)) {
+            if (marker.equals(mRUC)) {
                 badge = R.drawable.ic_launcher_foreground;
             }
             ((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
@@ -105,6 +106,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onInfoWindowClick(Marker marker) {
+        if (marker.equals(mRUC)) {
+            startActivity(new Intent(MapsActivity.this, SettingsActivity.class)); // placeholder sends you to settings
+        }
 
     }
 }
