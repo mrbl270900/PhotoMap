@@ -4,10 +4,8 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -17,13 +15,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private int SELECT_IMAGE;
+    private int SELECT_IMAGE = 0;
     private ImageView img;
     Button minknap;
     TextView hello;
@@ -45,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         minknap3.setOnClickListener(this);
 
         hello = findViewById(R.id.textView);
-        img = (ImageView)findViewById(R.id.imageView2);
+        img = findViewById(R.id.imageView2);
     }
 
     @Override
@@ -72,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Uri selectedImageUri = data.getData();
                 String selectedImagePath = getPath(selectedImageUri);
                 System.out.println("Image Path : " + selectedImagePath);
-                ExifInterface exif = null;
+                /*ExifInterface exif;
                 try {
                     exif = new ExifInterface(selectedImagePath);
                     String lat = ExifInterface.TAG_GPS_LATITUDE;
@@ -85,26 +82,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
+                }*/
 
                 img.setImageURI(selectedImageUri);
             }
         }
     }
     public String getPath(Uri uri) {
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
-        String document_id = cursor.getString(0);
-        document_id = document_id.substring(document_id.lastIndexOf(":") + 1);
-        cursor.close();
-
-        cursor = getContentResolver().query(
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
-        cursor.moveToFirst();
-        @SuppressLint("Range") String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-        cursor.close();
-
-        return path;
+        return cursor.getString(column_index);
     }
 }
