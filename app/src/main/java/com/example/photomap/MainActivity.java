@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -68,6 +69,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String selectedImagePath = getPath(selectedImageUri);
                 System.out.println("Image Path : " + selectedImagePath);
                 img.setImageURI(selectedImageUri);
+                ExifInterface exif = null;
+                try {
+                    exif = new ExifInterface(selectedImagePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                String lat = ExifInterface.TAG_GPS_LATITUDE;
+                String lat_data = exif.getAttribute(lat);
+                String lng = ExifInterface.TAG_GPS_LONGITUDE;
+                String lng_data = exif.getAttribute(lng);
             }
         }
     }
