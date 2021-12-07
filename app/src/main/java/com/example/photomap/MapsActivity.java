@@ -1,12 +1,17 @@
 package com.example.photomap;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
@@ -14,6 +19,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,6 +32,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener, View.OnClickListener {
@@ -34,6 +41,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ActivityMapsBinding binding;
     private static final LatLng RUC = new LatLng(55.652330724, 12.137999448);
     private Marker mRUC;
+    private String location;
+    private LatLng latLng;
+    private Marker searchMarker;
+    private int SELECT_IMAGE;
+    private ArrayList<Uri> pictureUri;
     SearchView searchView;
     Button minknap;
 
@@ -43,7 +55,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        pictureUri = new ArrayList<>();
         searchView = findViewById(R.id.idSearchView);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -56,7 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                String location = searchView.getQuery().toString();
+                location = searchView.getQuery().toString();
                 List<Address> addressList = null;
                 if (location != null || location.equals("")) {
                     // on below line we are creating and initializing a geo coder.
@@ -74,13 +86,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     // on below line we are creating a variable for our location
                     // where we will add our locations latitude and longitude.
-                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                    latLng = new LatLng(address.getLatitude(), address.getLongitude());
 
                     // on below line we are adding marker to that position.
-                    mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+                    if (searchMarker != null) {
+                        searchMarker.remove();
+                    }
+                    searchMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("searchMarker"));
 
                     // below line is to animate camera to that position.
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
                 }
                 return false;
             }
@@ -95,8 +110,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onClick(View v) {
         if(v == minknap) {
-            System.out.println("yoink");
+            if (searchMarker != null) {
+                searchMarker.remove();
+                String name = String.valueOf(pictureUri.size());
+                mMap.addMarker(new MarkerOptions().position(latLng).title(name));
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"),SELECT_IMAGE);
+            }else{
+                Toast toast = Toast.makeText(getApplicationContext(), "Søg efter en lokation først", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }
+    }
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == SELECT_IMAGE) {
+                Uri selectedImageUri = data.getData();
+                String selectedImagePath = getPath(selectedImageUri);
+                System.out.println("Image Path : " + selectedImagePath);
+                /*ExifInterface exif;
+                try {
+                    exif = new ExifInterface(selectedImagePath);
+                    String lat = ExifInterface.TAG_GPS_LATITUDE;
+                    if (!lat.isEmpty()){
+                        String lat_data = exif.getAttribute(lat);
+                    }
+                    String lng = ExifInterface.TAG_GPS_LONGITUDE;
+                    if (!lng.isEmpty()) {
+                        String lng_data = exif.getAttribute(lng);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+
+                pictureUri.add(selectedImageUri);
+            }
+        }
+    }
+    public String getPath(Uri uri) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
     }
 
     class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
@@ -125,12 +186,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         private void render(Marker marker, View view) {
-            int badge = 0;
+            Uri badge;
             // Use the equals() method on a Marker to check for equals.  Do not use ==.
-            if (marker.equals(mRUC)) {
-                badge = R.drawable.ic_launcher_foreground;
-            }
-            ((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
+
+            badge = pictureUri.get(Integer.parseInt(marker.getTitle()));
+
+            ((ImageView) view.findViewById(R.id.badge)).setImageURI(badge);
 
         }
     }
