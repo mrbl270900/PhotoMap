@@ -188,10 +188,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         private void render(Marker marker, View view) {
             Uri badge;
             // Use the equals() method on a Marker to check for equals.  Do not use ==.
-
-            badge = pictureUri.get(Integer.parseInt(marker.getTitle()));
-
-            ((ImageView) view.findViewById(R.id.badge)).setImageURI(badge);
+            if (marker.equals(searchMarker)) {
+                Toast toast = Toast.makeText(getApplicationContext(), "du har trykket på searchmarkeren", Toast.LENGTH_SHORT);
+                toast.show();
+            }else {
+                badge = pictureUri.get(Integer.parseInt(marker.getTitle()));
+                ((ImageView) view.findViewById(R.id.badge)).setImageURI(badge);
+            }
 
         }
     }
@@ -215,7 +218,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //mMap.addMarker(new MarkerOptions().position(RUC).title("Marker ved RUC"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RUC, zoomLevel));
         mMap.setOnMarkerClickListener(this);
-        mRUC = mMap.addMarker(new MarkerOptions().position(RUC).title("Marker ved RUC").infoWindowAnchor(0.5f, 0.5f));
+        //mRUC = mMap.addMarker(new MarkerOptions().position(RUC).title("Marker ved RUC").infoWindowAnchor(0.5f, 0.5f));
     }
 
     @Override
