@@ -4,11 +4,15 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -21,12 +25,18 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener {
+import java.io.IOException;
+import java.util.List;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener, View.OnClickListener {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
     private static final LatLng RUC = new LatLng(55.652330724, 12.137999448);
     private Marker mRUC;
+    SearchView searchView;
+    Button minknap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,11 +44,61 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        searchView = findViewById(R.id.idSearchView);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.googleMap);
         mapFragment.getMapAsync(this);
+
+        minknap = findViewById(R.id.button6);
+        minknap.setOnClickListener(this);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                String location = searchView.getQuery().toString();
+                List<Address> addressList = null;
+                if (location != null || location.equals("")) {
+                    // on below line we are creating and initializing a geo coder.
+                    Geocoder geocoder = new Geocoder(MapsActivity.this);
+                    try {
+                        // on below line we are getting location from the
+                        // location name and adding that location to address list.
+                        addressList = geocoder.getFromLocationName(location, 1);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    // on below line we are getting the location
+                    // from our list a first position.
+                    Address address = addressList.get(0);
+
+                    // on below line we are creating a variable for our location
+                    // where we will add our locations latitude and longitude.
+                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+
+                    // on below line we are adding marker to that position.
+                    mMap.addMarker(new MarkerOptions().position(latLng).title(location));
+
+                    // below line is to animate camera to that position.
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
+
+    @Override
+    public void onClick(View v) {
+        if(v == minknap) {
+            System.out.println("yoink");
+        }
+    }
+
     class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         // These are both viewgroups containing an ImageView with id "badge" and two TextViews with id
