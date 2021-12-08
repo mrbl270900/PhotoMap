@@ -8,9 +8,11 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -31,6 +33,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,33 +134,46 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (resultCode == RESULT_OK) {
             if (requestCode == SELECT_IMAGE) {
                 Uri selectedImageUri = data.getData();
+                //File selectedImageFile = getFile(selectedImageUri);
                 String selectedImagePath = getPath(selectedImageUri);
                 System.out.println("Image Path : " + selectedImagePath);
-                /*ExifInterface exif;
+                pictureUri.add(selectedImageUri);
+                ExifInterface exif;
                 try {
-                    exif = new ExifInterface(selectedImagePath);
+                    exif = new ExifInterface(getFile(selectedImageUri));
                     String lat = ExifInterface.TAG_GPS_LATITUDE;
+                    String lng = ExifInterface.TAG_GPS_LONGITUDE;
                     if (!lat.isEmpty()){
                         String lat_data = exif.getAttribute(lat);
+                        System.out.println(lat_data);
                     }
-                    String lng = ExifInterface.TAG_GPS_LONGITUDE;
                     if (!lng.isEmpty()) {
                         String lng_data = exif.getAttribute(lng);
+                        System.out.println(lng_data);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                }*/
+                }
 
-                pictureUri.add(selectedImageUri);
             }
         }
     }
+    public File getFile(Uri uri) {
+        File path = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File file = new File(path, uri.getPath());//create path from uri
+        try {
+            // Make sure the Pictures directory exists.
+            file.getParentFile().mkdirs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
     public String getPath(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
+        File file = new File(uri.getPath());//create path from uri
+        String filePath = file.getPath();
+        return filePath;
     }
 
     class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
