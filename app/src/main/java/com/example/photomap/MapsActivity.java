@@ -3,39 +3,28 @@ package com.example.photomap;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
-import android.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -44,13 +33,11 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener, View.OnClickListener {
 
     private GoogleMap mMap;
-    private ActivityMapsBinding binding;
     private static final LatLng RUC = new LatLng(55.652330724, 12.137999448);
-    private Marker mRUC;
     private String location;
     private LatLng latLng;
     private Marker searchMarker;
-    private int SELECT_IMAGE = 1;
+    private final int SELECT_IMAGE = 1;
     private ArrayList<Uri> pictureUri;
     SearchView searchView;
     Button minknap;
@@ -59,7 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        com.example.photomap.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         pictureUri = new ArrayList<>();
         searchView = findViewById(R.id.idSearchView);
@@ -220,12 +207,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
         mMap.setOnInfoWindowClickListener(this);
         float zoomLevel = 14.0f;
-        // Add a marker in Sydney and move the camera
-
-        //mMap.addMarker(new MarkerOptions().position(RUC).title("Marker ved RUC"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RUC, zoomLevel));
         mMap.setOnMarkerClickListener(this);
-        //mRUC = mMap.addMarker(new MarkerOptions().position(RUC).title("Marker ved RUC").infoWindowAnchor(0.5f, 0.5f));
     }
 
     @Override
@@ -237,9 +220,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        if (marker.equals(mRUC)) {
+        /*if (marker.equals(mRUC)) {
             startActivity(new Intent(MapsActivity.this, SettingsActivity.class)); // placeholder sends you to settings
-        }
+        }*/
 
     }
 }
