@@ -3,6 +3,8 @@ package com.example.photomap;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -35,6 +37,7 @@ import com.example.photomap.databinding.ActivityMapsBinding;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String location;
     private LatLng latLng;
     private Marker searchMarker;
-    private int SELECT_IMAGE;
+    private int SELECT_IMAGE = 1;
     private ArrayList<Uri> pictureUri;
     SearchView searchView;
     Button minknap;
@@ -117,16 +120,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 searchMarker.remove();
                 String name = String.valueOf(pictureUri.size());
                 mMap.addMarker(new MarkerOptions().position(latLng).title(name));
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Picture"),SELECT_IMAGE);
+                Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                getIntent.setType("image/*");
+
+                Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                pickIntent.setType("image/*");
+
+                Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+
+                startActivityForResult(chooserIntent, SELECT_IMAGE);
             }else{
                 Toast toast = Toast.makeText(getApplicationContext(), "Søg efter en lokation først", Toast.LENGTH_SHORT);
                 toast.show();
             }
         }
     }
+
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -135,12 +145,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (requestCode == SELECT_IMAGE) {
                 Uri selectedImageUri = data.getData();
                 //File selectedImageFile = getFile(selectedImageUri);
-                String selectedImagePath = getPath(selectedImageUri);
+                String selectedImagePath = selectedImageUri.getPath();
                 System.out.println("Image Path : " + selectedImagePath);
                 pictureUri.add(selectedImageUri);
-                ExifInterface exif;
-                try {
-                    exif = new ExifInterface(getFile(selectedImageUri));
+                try (InputStream inputStream = this.getContentResolver().openInputStream(selectedImageUri)) {
+                    ExifInterface exif = new ExifInterface(inputStream);
                     String lat = ExifInterface.TAG_GPS_LATITUDE;
                     String lng = ExifInterface.TAG_GPS_LONGITUDE;
                     if (!lat.isEmpty()){
@@ -154,26 +163,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         }
-    }
-    public File getFile(Uri uri) {
-        File path = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        File file = new File(path, uri.getPath());//create path from uri
-        try {
-            // Make sure the Pictures directory exists.
-            file.getParentFile().mkdirs();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return file;
-    }
-    public String getPath(Uri uri) {
-        File file = new File(uri.getPath());//create path from uri
-        String filePath = file.getPath();
-        return filePath;
     }
 
     class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
