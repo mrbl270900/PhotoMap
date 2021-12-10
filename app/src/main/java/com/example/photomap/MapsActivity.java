@@ -94,7 +94,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if(noGPS) {
                         String name = String.valueOf(pictureUri.size() - 1);
                         noGPS = false;
-                        markerList.add(mMap.addMarker(new MarkerOptions().position(latLng).title(name)));
+                        markerList.add(mMap.addMarker(new MarkerOptions().position(latLng).title(name).draggable(true)));
                     }else{
                         searchMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("searchMarker"));
                     }
