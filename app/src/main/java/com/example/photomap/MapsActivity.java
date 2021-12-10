@@ -145,30 +145,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String lngData = exif.getAttribute(lng);
                     if (!latData.isEmpty()){
                         System.out.println(latData);
-                        String convertetLatData = latData.replaceAll(",", ".");
-                        String[] latArray = convertetLatData.split("/");
-                        for (int i = 0; i < latArray.length; i++) {
-                            System.out.println(latArray[i]);
-                        }
+                        String convertetLatData = latData.replaceAll("/", ",");
+                        String[] latArray = convertetLatData.split(",");
                         Double nDegree = Double.parseDouble(latArray[0]);
-                        Double nMinute = Double.parseDouble(latArray[1]);
-                        Double nSecond = Double.parseDouble(latArray[2]);
-                        Double nSecDenumurator = Double.parseDouble(latArray[3]);
-                        latFinal = nDegree + nMinute/60 + (nSecond/3600)/nSecDenumurator;
+                        Double nDegreeDenumurator = Double.parseDouble(latArray[1]);
+                        Double nMinute = Double.parseDouble(latArray[2]);
+                        Double nMinuteDenumurator = Double.parseDouble(latArray[3]);
+                        Double nSecond = Double.parseDouble(latArray[4]);
+                        Double nSecondDenumurator = Double.parseDouble(latArray[5]);
+                        latFinal = nDegree/nDegreeDenumurator + (nMinute/60)/nMinuteDenumurator + (nSecond/3600)/nSecondDenumurator;
                         System.out.println(latFinal);
                     }
                     if (!lngData.isEmpty()) {
                         System.out.println(lngData);
-                        String convertetLngData = lngData.replaceAll(",", ".");
-                        String[] lngArray = convertetLngData.split("/");
-                        for (int i = 0; i < lngArray.length; i++) {
-                            System.out.println(lngArray[i]);
-                        }
+                        String convertetLngData = lngData.replaceAll("/", ",");
+                        String[] lngArray = convertetLngData.split(",");
                         Double eDegree = Double.parseDouble(lngArray[0]);
-                        Double eMinute = Double.parseDouble(lngArray[1]);
-                        Double eSecond = Double.parseDouble(lngArray[2]);
-                        Double eSecDenumurator = Double.parseDouble(lngArray[3]);
-                        lngFinal = eDegree + eMinute/60 + (eSecond/3600)/eSecDenumurator;
+                        Double eDegreeDenumurator = Double.parseDouble(lngArray[1]);
+                        Double eMinute = Double.parseDouble(lngArray[2]);
+                        Double eMinuteDenumurator = Double.parseDouble(lngArray[3]);
+                        Double eSecond = Double.parseDouble(lngArray[4]);
+                        Double eSecondDenumurator = Double.parseDouble(lngArray[5]);
+                        lngFinal = eDegree/eDegreeDenumurator + (eMinute/60)/eMinuteDenumurator + (eSecond/3600)/eSecondDenumurator;
                         System.out.println(lngFinal);
                     }
                 } catch (IOException e) {
