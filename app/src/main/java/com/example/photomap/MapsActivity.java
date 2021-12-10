@@ -44,6 +44,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Button minknap;
     double latFinal;
     double lngFinal;
+    boolean noGPS = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,10 +89,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (searchMarker != null) {
                         searchMarker.remove();
                     }
-                    searchMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("searchMarker"));
-
+                    if(noGPS) {
+                        String name = String.valueOf(pictureUri.size() - 1);
+                        mMap.addMarker(new MarkerOptions().position(latLng).title(name));
+                        noGPS = false;
+                        System.out.println("if");
+                    }else{
+                        System.out.println("else");
+                        searchMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("searchMarker"));
+                    }
                     // below line is to animate camera to that position.
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
+
                 }
                 return false;
             }
@@ -106,10 +115,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onClick(View v) {
         if(v == minknap) {
-            if (searchMarker != null) {
-                searchMarker.remove();
-                String name = String.valueOf(pictureUri.size());
-                mMap.addMarker(new MarkerOptions().position(latLng).title(name));
                 Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 getIntent.setType("image/*");
 
@@ -120,10 +125,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
 
                 startActivityForResult(chooserIntent, SELECT_IMAGE);
-            }else{
-                Toast toast = Toast.makeText(getApplicationContext(), "Søg efter en lokation først", Toast.LENGTH_SHORT);
-                toast.show();
-            }
         }
     }
 
@@ -137,7 +138,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //File selectedImageFile = getFile(selectedImageUri);
                 String selectedImagePath = selectedImageUri.getPath();
                 System.out.println("Image Path : " + selectedImagePath);
-                pictureUri.add(selectedImageUri);
                 try (InputStream inputStream = this.getContentResolver().openInputStream(selectedImageUri)) {
                     ExifInterface exif = new ExifInterface(inputStream);
                     String lat = ExifInterface.TAG_GPS_LATITUDE;
@@ -170,17 +170,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Double eSecondDenumurator = Double.parseDouble(lngArray[5]);
                             lngFinal = eDegree / eDegreeDenumurator + (eMinute / 60) / eMinuteDenumurator + (eSecond / 3600) / eSecondDenumurator;
                             System.out.println(lngFinal);
+                            LatLng picLatLng = new LatLng(latFinal, lngFinal);
+                            String name = String.valueOf(pictureUri.size());
+                            mMap.addMarker(new MarkerOptions().position(picLatLng).title(name));
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(picLatLng, 14.0f));
+                            pictureUri.add(selectedImageUri);
                         }
                     }catch (NullPointerException j){
                         j.printStackTrace();
-                        Toast toast = Toast.makeText(getApplicationContext(), "Dette billede har ingen GPS data", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplicationContext(), "Dette billede har ingen GPS data søg efter lokation", Toast.LENGTH_SHORT);
                         toast.show();
+                        pictureUri.add(selectedImageUri);
+                        noGPS = true;
+                        System.out.println("cath");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
             }
         }
     }
@@ -213,9 +219,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         private void render(Marker marker, View view) {
             Uri badge;
             // Use the equals() method on a Marker to check for equals.  Do not use ==.
-            if (marker.equals(searchMarker)) {
+            if (marker.getTitle().equals("searchMarker")) {
                 Toast toast = Toast.makeText(getApplicationContext(), "Du har trykket på searchmarkeren", Toast.LENGTH_SHORT);
                 toast.show();
+                ((ImageView) view.findViewById(R.id.badge)).setImageURI(null);
             }else {
                 badge = pictureUri.get(Integer.parseInt(marker.getTitle()));
                 ((ImageView) view.findViewById(R.id.badge)).setImageURI(badge);
