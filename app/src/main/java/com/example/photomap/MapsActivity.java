@@ -6,7 +6,8 @@ import androidx.fragment.app.FragmentActivity;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
-import androidx.exifinterface.media.ExifInterface;
+
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -143,31 +144,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String lng = ExifInterface.TAG_GPS_LONGITUDE;
                     String latData = exif.getAttribute(lat);
                     String lngData = exif.getAttribute(lng);
-                    if (!latData.isEmpty()){
-                        System.out.println(latData);
-                        String convertetLatData = latData.replaceAll("/", ",");
-                        String[] latArray = convertetLatData.split(",");
-                        Double nDegree = Double.parseDouble(latArray[0]);
-                        Double nDegreeDenumurator = Double.parseDouble(latArray[1]);
-                        Double nMinute = Double.parseDouble(latArray[2]);
-                        Double nMinuteDenumurator = Double.parseDouble(latArray[3]);
-                        Double nSecond = Double.parseDouble(latArray[4]);
-                        Double nSecondDenumurator = Double.parseDouble(latArray[5]);
-                        latFinal = nDegree/nDegreeDenumurator + (nMinute/60)/nMinuteDenumurator + (nSecond/3600)/nSecondDenumurator;
-                        System.out.println(latFinal);
-                    }
-                    if (!lngData.isEmpty()) {
-                        System.out.println(lngData);
-                        String convertetLngData = lngData.replaceAll("/", ",");
-                        String[] lngArray = convertetLngData.split(",");
-                        Double eDegree = Double.parseDouble(lngArray[0]);
-                        Double eDegreeDenumurator = Double.parseDouble(lngArray[1]);
-                        Double eMinute = Double.parseDouble(lngArray[2]);
-                        Double eMinuteDenumurator = Double.parseDouble(lngArray[3]);
-                        Double eSecond = Double.parseDouble(lngArray[4]);
-                        Double eSecondDenumurator = Double.parseDouble(lngArray[5]);
-                        lngFinal = eDegree/eDegreeDenumurator + (eMinute/60)/eMinuteDenumurator + (eSecond/3600)/eSecondDenumurator;
-                        System.out.println(lngFinal);
+                    try {
+                        if (!latData.equals(null)) {
+                            System.out.println(latData);
+                            String convertetLatData = latData.replaceAll("/", ",");
+                            String[] latArray = convertetLatData.split(",");
+                            Double nDegree = Double.parseDouble(latArray[0]);
+                            Double nDegreeDenumurator = Double.parseDouble(latArray[1]);
+                            Double nMinute = Double.parseDouble(latArray[2]);
+                            Double nMinuteDenumurator = Double.parseDouble(latArray[3]);
+                            Double nSecond = Double.parseDouble(latArray[4]);
+                            Double nSecondDenumurator = Double.parseDouble(latArray[5]);
+                            latFinal = nDegree / nDegreeDenumurator + (nMinute / 60) / nMinuteDenumurator + (nSecond / 3600) / nSecondDenumurator;
+                            System.out.println(latFinal);
+                        }
+                        if (!lngData.equals(null)) {
+                            System.out.println(lngData);
+                            String convertetLngData = lngData.replaceAll("/", ",");
+                            String[] lngArray = convertetLngData.split(",");
+                            Double eDegree = Double.parseDouble(lngArray[0]);
+                            Double eDegreeDenumurator = Double.parseDouble(lngArray[1]);
+                            Double eMinute = Double.parseDouble(lngArray[2]);
+                            Double eMinuteDenumurator = Double.parseDouble(lngArray[3]);
+                            Double eSecond = Double.parseDouble(lngArray[4]);
+                            Double eSecondDenumurator = Double.parseDouble(lngArray[5]);
+                            lngFinal = eDegree / eDegreeDenumurator + (eMinute / 60) / eMinuteDenumurator + (eSecond / 3600) / eSecondDenumurator;
+                            System.out.println(lngFinal);
+                        }
+                    }catch (NullPointerException j){
+                        j.printStackTrace();
+                        Toast toast = Toast.makeText(getApplicationContext(), "Dette billede har ingen GPS data", Toast.LENGTH_SHORT);
+                        toast.show();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
