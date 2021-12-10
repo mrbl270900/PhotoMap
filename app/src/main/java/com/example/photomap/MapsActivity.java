@@ -41,6 +41,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<Uri> pictureUri;
     SearchView searchView;
     Button minknap;
+    double latFinal;
+    double lngFinal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,17 +141,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     ExifInterface exif = new ExifInterface(inputStream);
                     String lat = ExifInterface.TAG_GPS_LATITUDE;
                     String lng = ExifInterface.TAG_GPS_LONGITUDE;
-                    if (!lat.isEmpty()){
-                        String lat_data = exif.getAttribute(lat);
-                        System.out.println(lat_data);
+                    String latData = exif.getAttribute(lat);
+                    String lngData = exif.getAttribute(lng);
+                    if (!latData.isEmpty()){
+                        System.out.println(latData);
+                        String convertetLatData = latData.replaceAll(",", ".");
+                        String[] latArray = convertetLatData.split("/");
+                        for (int i = 0; i < latArray.length; i++) {
+                            System.out.println(latArray[i]);
+                        }
+                        Double nDegree = Double.parseDouble(latArray[0]);
+                        Double nMinute = Double.parseDouble(latArray[1]);
+                        Double nSecond = Double.parseDouble(latArray[2]);
+                        Double nSecDenumurator = Double.parseDouble(latArray[3]);
+                        latFinal = nDegree + nMinute/60 + (nSecond/3600)/nSecDenumurator;
+                        System.out.println(latFinal);
                     }
-                    if (!lng.isEmpty()) {
-                        String lng_data = exif.getAttribute(lng);
-                        System.out.println(lng_data);
+                    if (!lngData.isEmpty()) {
+                        System.out.println(lngData);
+                        String convertetLngData = lngData.replaceAll(",", ".");
+                        String[] lngArray = convertetLngData.split("/");
+                        for (int i = 0; i < lngArray.length; i++) {
+                            System.out.println(lngArray[i]);
+                        }
+                        Double eDegree = Double.parseDouble(lngArray[0]);
+                        Double eMinute = Double.parseDouble(lngArray[1]);
+                        Double eSecond = Double.parseDouble(lngArray[2]);
+                        Double eSecDenumurator = Double.parseDouble(lngArray[3]);
+                        lngFinal = eDegree + eMinute/60 + (eSecond/3600)/eSecDenumurator;
+                        System.out.println(lngFinal);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+
             }
         }
     }
@@ -183,7 +209,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Uri badge;
             // Use the equals() method on a Marker to check for equals.  Do not use ==.
             if (marker.equals(searchMarker)) {
-                Toast toast = Toast.makeText(getApplicationContext(), "du har trykket på searchmarkeren", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(getApplicationContext(), "Du har trykket på searchmarkeren", Toast.LENGTH_SHORT);
                 toast.show();
             }else {
                 badge = pictureUri.get(Integer.parseInt(marker.getTitle()));
