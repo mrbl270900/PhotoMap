@@ -40,6 +40,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Marker searchMarker;
     private final int SELECT_IMAGE = 1;
     private ArrayList<Uri> pictureUri;
+    private ArrayList<Marker> markerList;
     SearchView searchView;
     Button minknap;
     double latFinal;
@@ -53,6 +54,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         com.example.photomap.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         pictureUri = new ArrayList<>();
+        markerList = new ArrayList<>();
         searchView = findViewById(R.id.idSearchView);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -91,11 +93,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                     if(noGPS) {
                         String name = String.valueOf(pictureUri.size() - 1);
-                        mMap.addMarker(new MarkerOptions().position(latLng).title(name));
                         noGPS = false;
-                        System.out.println("if");
+                        markerList.add(mMap.addMarker(new MarkerOptions().position(latLng).title(name)));
                     }else{
-                        System.out.println("else");
                         searchMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("searchMarker"));
                     }
                     // below line is to animate camera to that position.
@@ -172,7 +172,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             System.out.println(lngFinal);
                             LatLng picLatLng = new LatLng(latFinal, lngFinal);
                             String name = String.valueOf(pictureUri.size());
-                            mMap.addMarker(new MarkerOptions().position(picLatLng).title(name));
+                            markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(picLatLng, 14.0f));
                             pictureUri.add(selectedImageUri);
                         }
@@ -182,7 +182,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         toast.show();
                         pictureUri.add(selectedImageUri);
                         noGPS = true;
-                        System.out.println("cath");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -227,18 +226,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 badge = pictureUri.get(Integer.parseInt(marker.getTitle()));
                 ((ImageView) view.findViewById(R.id.badge)).setImageURI(badge);
             }
-
         }
     }
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -261,6 +251,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /*if (marker.equals(mRUC)) {
             startActivity(new Intent(MapsActivity.this, SettingsActivity.class)); // placeholder sends you to settings
         }*/
-
     }
 }
