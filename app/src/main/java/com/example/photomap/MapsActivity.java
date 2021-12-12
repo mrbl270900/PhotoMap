@@ -28,7 +28,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -53,6 +55,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double latFinal;
     double lngFinal;
     boolean noGPS = false;
+    Uri selectedImageUri;
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef = storage.getReference();
     StorageReference imagesRef = storageRef.child("images");
@@ -105,6 +108,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         String name = String.valueOf(pictureUri.size() - 1);
                         noGPS = false;
                         markerList.add(mMap.addMarker(new MarkerOptions().position(latLng).title(name).draggable(true)));
+                        StorageReference picFromUser = imagesRef.child(selectedImageUri.getLastPathSegment());
+                        StorageMetadata metadata = new StorageMetadata.Builder()
+                                .setContentType("image/jpg")
+                                .setCustomMetadata("lng", String.valueOf(address.getLongitude()))
+                                .setCustomMetadata("lat", String.valueOf(address.getLatitude()))
+                                .build();
+                        UploadTask uploadTask = picFromUser.putFile(selectedImageUri, metadata);
+
+                        // Register observers to listen for when the download is done or if it fails
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                Toast toast = Toast.makeText(getApplicationContext(), "upload er ikke lykkedes", Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                Toast toast = Toast.makeText(getApplicationContext(), "upload er lykkedes", Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+                        });
                     }else{
                         searchMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("searchMarker"));
                     }
@@ -144,27 +169,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onActivityResult(requestCode,resultCode,data);
         if (resultCode == RESULT_OK) {
             if (requestCode == SELECT_IMAGE) {
-                Uri selectedImageUri = data.getData();
-                //File selectedImageFile = getFile(selectedImageUri);
+                selectedImageUri = data.getData();
                 String selectedImagePath = selectedImageUri.getPath();
                 System.out.println("Image Path : " + selectedImagePath);
                 StorageReference picFromUser = imagesRef.child(selectedImageUri.getLastPathSegment());
-                UploadTask uploadTask = picFromUser.putFile(selectedImageUri);
-
-                // Register observers to listen for when the download is done or if it fails
-                uploadTask.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        Toast toast = Toast.makeText(getApplicationContext(), "upload er ikke lykkedes", Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Toast toast = Toast.makeText(getApplicationContext(), "upload er lykkedes", Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                });
 
 
                 try (InputStream inputStream = this.getContentResolver().openInputStream(selectedImageUri)) {
@@ -203,6 +211,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             String name = String.valueOf(pictureUri.size());
                             markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(picLatLng, 14.0f));
+                            StorageMetadata metadata = new StorageMetadata.Builder()
+                                    .setContentType("image/jpg")
+                                    .setCustomMetadata("lng", String.valueOf(lngFinal))
+                                    .setCustomMetadata("lat", String.valueOf(latFinal))
+                                    .build();
+                            UploadTask uploadTask = picFromUser.putFile(selectedImageUri, metadata);
+
+                            // Register observers to listen for when the download is done or if it fails
+                            uploadTask.addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    Toast toast = Toast.makeText(getApplicationContext(), "upload er ikke lykkedes", Toast.LENGTH_SHORT);
+                                    toast.show();
+                                }
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    Toast toast = Toast.makeText(getApplicationContext(), "upload er lykkedes", Toast.LENGTH_SHORT);
+                                    toast.show();
+                                }
+                            });
                             pictureUri.add(selectedImageUri);
                         }
                     }catch (NullPointerException j){
