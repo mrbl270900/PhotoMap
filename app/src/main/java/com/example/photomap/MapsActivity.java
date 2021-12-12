@@ -298,6 +298,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         float zoomLevel = 14.0f;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RUC, zoomLevel));
         mMap.setOnMarkerClickListener(this);
+        System.out.println("her");
         imagesRef.listAll()
                 .addOnSuccessListener(new OnSuccessListener<ListResult>() {
                     @Override
@@ -305,14 +306,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         for (StorageReference prefix : listResult.getPrefixes()) {
                             // All the prefixes under listRef.
                             // You may call listAll() recursively on them.
+                            System.out.println(prefix);
                         }
 
                         for (StorageReference item : listResult.getItems()) {
                             // All the items under listRef.
-
-
-
-
                         }
                     }
                 })
