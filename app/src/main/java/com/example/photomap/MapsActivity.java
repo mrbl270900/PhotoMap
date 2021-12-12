@@ -1,5 +1,6 @@
 package com.example.photomap;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
@@ -25,7 +26,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -46,6 +53,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double latFinal;
     double lngFinal;
     boolean noGPS = false;
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+    StorageReference storageRef = storage.getReference();
+    StorageReference imagesRef = storageRef.child("images");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +148,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //File selectedImageFile = getFile(selectedImageUri);
                 String selectedImagePath = selectedImageUri.getPath();
                 System.out.println("Image Path : " + selectedImagePath);
+                StorageReference picFromUser = imagesRef.child(selectedImageUri.getLastPathSegment());
+                UploadTask uploadTask = picFromUser.putFile(selectedImageUri);
+
+                // Register observers to listen for when the download is done or if it fails
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        Toast toast = Toast.makeText(getApplicationContext(), "upload er ikke lykkedes", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Toast toast = Toast.makeText(getApplicationContext(), "upload er lykkedes", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                });
+
+
                 try (InputStream inputStream = this.getContentResolver().openInputStream(selectedImageUri)) {
                     ExifInterface exif = new ExifInterface(inputStream);
                     String lat = ExifInterface.TAG_GPS_LATITUDE;
