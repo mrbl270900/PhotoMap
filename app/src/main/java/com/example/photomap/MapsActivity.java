@@ -31,6 +31,8 @@ import com.example.photomap.databinding.ActivityMapsBinding;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageMetadata;
@@ -62,7 +64,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Uri selectedImageUri;
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef = storage.getReference();
-    StorageReference imagesRef = storageRef.child("images");
+    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    StorageReference imagesRef = storageRef.child(user.getUid());
 
 
 

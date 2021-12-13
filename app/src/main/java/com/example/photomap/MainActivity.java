@@ -29,9 +29,7 @@ import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    ImageView img;
     Button minknap;
-    TextView hello;
     Button minknap2;
     Button minknap3;
     List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build());
@@ -50,8 +48,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         minknap3 = findViewById(R.id.button3);
         minknap3.setOnClickListener(this);
 
-        hello = findViewById(R.id.textView);
-        img = findViewById(R.id.imageView2);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // User is signed in
+        } else {
+            // No user is signed in
+            Intent signInIntent = AuthUI.getInstance()
+                    .createSignInIntentBuilder()
+                    .setAvailableProviders(providers)
+                    .build();
+            signInLauncher.launch(signInIntent);
+        }
 
 
     }
@@ -59,7 +66,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v){
         if(v == minknap){
-            startActivity(new Intent(MainActivity.this, MapsActivity.class));
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                startActivity(new Intent(MainActivity.this, MapsActivity.class));
+            }else{
+                Toast toast = Toast.makeText(getApplicationContext(), "Log ind for at se kortet", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }else if(v == minknap2){
             AuthUI.getInstance()
                     .signOut(this)
@@ -96,12 +109,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (result.getResultCode() == RESULT_OK) {
             // Successfully signed in
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            // ...
         } else {
-            // Sign in failed. If response is null the user canceled the
-            // sign-in flow using the back button. Otherwise check
-            // response.getError().getErrorCode() and handle the error.
-            // ...
+            Toast toast = Toast.makeText(getApplicationContext(), "Dit log ind fejlede", Toast.LENGTH_SHORT);
+            toast.show();
         }
     }
 }
