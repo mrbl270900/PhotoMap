@@ -30,11 +30,11 @@
 
     <FrameLayout
         android:id="@+id/frameLayout3"
-        android:layout_width="401dp"
-        android:layout_height="407dp"
+        android:layout_width="386dp"
+        android:layout_height="140dp"
         map:layout_constraintBottom_toBottomOf="@+id/googleMap"
-        map:layout_constraintEnd_toEndOf="@+id/googleMap"
-        map:layout_constraintStart_toStartOf="@+id/googleMap"
+        map:layout_constraintEnd_toEndOf="parent"
+        map:layout_constraintStart_toStartOf="parent"
         map:layout_constraintTop_toTopOf="@+id/googleMap"
         map:layout_constraintVertical_bias="1.0">
 
@@ -42,13 +42,13 @@
 
     <SearchView
         android:id="@+id/idSearchView"
-        android:layout_width="245dp"
-        android:layout_height="125dp"
+        android:layout_width="289dp"
+        android:layout_height="45dp"
         map:layout_constraintBottom_toTopOf="@+id/frameLayout3"
         map:layout_constraintEnd_toEndOf="parent"
-        map:layout_constraintHorizontal_bias="0.174"
+        map:layout_constraintHorizontal_bias="0.0"
         map:layout_constraintStart_toStartOf="parent"
         map:layout_constraintTop_toTopOf="parent"
-        map:layout_constraintVertical_bias="0.08" />
+        map:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

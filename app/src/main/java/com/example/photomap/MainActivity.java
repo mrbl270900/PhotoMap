@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +34,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button minknap2;
     Button minknap3;
     Button minknap4;
-    TextView input;
+    Button minknap5;
+    EditText input;
     List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build());
 
     @Override
@@ -52,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         minknap4 = findViewById(R.id.button7);
         minknap4.setOnClickListener(this);
+
+        minknap5 = findViewById(R.id.button5);
+        minknap5.setOnClickListener(this);
 
         input = findViewById(R.id.plain_text_input);
 
@@ -96,13 +101,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             signInLauncher.launch(signInIntent);
         }else if(v == minknap4){
             if (user != null) {
-                String mapID = input.getText().toString();
-                Intent sendIntent = new Intent(MainActivity.this, MapsActivity.class);
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, mapID);
-                sendIntent.setType("text/plain");
-                Intent shareIntent = Intent.createChooser(sendIntent, null);
-                startActivity(shareIntent);
+                if(input.getText().toString().length()==28){
+                    String mapID = input.getText().toString();
+                    Intent sendIntent = new Intent(MainActivity.this, MapsActivity.class);
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, mapID);
+                    sendIntent.setType("text/plain");
+                    Intent shareIntent = Intent.createChooser(sendIntent, null);
+                    startActivity(shareIntent);
+                }else{
+                    Toast toast = Toast.makeText(getApplicationContext(), "KortId skal være 28 karaktere", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }else if(v == minknap5){
+                input.setText(user.getUid());
             }else{
                 Toast toast = Toast.makeText(getApplicationContext(), "Log ind for at se kortet", Toast.LENGTH_SHORT);
                 toast.show();
