@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button minknap;
     Button minknap2;
     Button minknap3;
+    Button minknap4;
+    TextView input;
     List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.GoogleBuilder().build());
 
     @Override
@@ -48,6 +50,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         minknap3 = findViewById(R.id.button3);
         minknap3.setOnClickListener(this);
 
+        minknap4 = findViewById(R.id.button7);
+        minknap4.setOnClickListener(this);
+
+        input = findViewById(R.id.plain_text_input);
+
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             // User is signed in
@@ -59,14 +66,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .build();
             signInLauncher.launch(signInIntent);
         }
-
-
     }
 
     @Override
     public void onClick(View v){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(v == minknap){
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 startActivity(new Intent(MainActivity.this, MapsActivity.class));
             }else{
@@ -83,13 +88,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
         }else if(v == minknap3){
-            //getSupportFragmentManager().beginTransaction().add(R.id.frameLayout, new SettingsFragment()).commit();
             // Create and launch sign-in intent
             Intent signInIntent = AuthUI.getInstance()
                     .createSignInIntentBuilder()
                     .setAvailableProviders(providers)
                     .build();
             signInLauncher.launch(signInIntent);
+        }else if(v == minknap4){
+            if (user != null) {
+                String mapID = input.getText().toString();
+                Intent sendIntent = new Intent(MainActivity.this, MapsActivity.class);
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, mapID);
+                sendIntent.setType("text/plain");
+                Intent shareIntent = Intent.createChooser(sendIntent, null);
+                startActivity(shareIntent);
+            }else{
+                Toast toast = Toast.makeText(getApplicationContext(), "Log ind for at se kortet", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }
     }
 

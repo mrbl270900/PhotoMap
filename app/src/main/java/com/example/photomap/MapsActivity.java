@@ -56,6 +56,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<Uri> pictureUri;
     private ArrayList<Marker> markerList;
     private ArrayList<Uri> urlList;
+    private String mapID;
     SearchView searchView;
     Button minknap;
     double latFinal;
@@ -65,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef = storage.getReference();
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    StorageReference imagesRef = storageRef.child(user.getUid());
+    StorageReference imagesRef;
 
 
 
@@ -76,7 +77,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // dette skal måske byttes ud da det gør vores app onresponciv
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if (sharedText != null) {
+                mapID = sharedText;
+                imagesRef = storageRef.child(mapID);
+            }
+        }else{
+            imagesRef = storageRef.child(user.getUid());
+        }
 
 
         com.example.photomap.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
@@ -396,8 +408,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        /*if (marker.equals(mRUC)) {
-            startActivity(new Intent(MapsActivity.this, SettingsActivity.class)); // placeholder sends you to settings
-        }*/
+        if(user.getUid().equals(imagesRef.getName())){
+            getSupportFragmentManager().beginTransaction().add(R.id.frameLayout3, new BlankFragment(marker.getTitle())).commit();
+        }else{
+            Toast toast = Toast.makeText(getApplicationContext(), "Du ejer ikke dette kort", Toast.LENGTH_SHORT);
+            toast.show();
+        }
     }
 }
