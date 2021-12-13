@@ -30,7 +30,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
@@ -42,8 +41,8 @@ import com.google.firebase.storage.UploadTask;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener, View.OnClickListener {
 
@@ -53,10 +52,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng latLng;
     private Marker searchMarker;
     private final int SELECT_IMAGE = 1;
-    private ArrayList<Uri> pictureUri;
-    private ArrayList<Marker> markerList;
-    private ArrayList<Uri> urlList;
-    private String mapID;
     SearchView searchView;
     Button minknap;
     double latFinal;
@@ -83,8 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
             if (sharedText != null) {
-                mapID = sharedText;
-                imagesRef = storageRef.child(mapID);
+                imagesRef = storageRef.child(sharedText);
             }
         }else{
             imagesRef = storageRef.child(user.getUid());
@@ -93,9 +87,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         com.example.photomap.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        pictureUri = new ArrayList<>();
-        markerList = new ArrayList<>();
-        urlList = new ArrayList<Uri>();
         searchView = findViewById(R.id.idSearchView);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -159,9 +150,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     @Override
                                     public void onSuccess(Uri downloadUrl)
                                     {
-                                        urlList.add(downloadUrl);
                                         String name = String.valueOf(downloadUrl);
-                                        markerList.add(mMap.addMarker(new MarkerOptions().position(latLng).title(name).draggable(true)));
+                                        mMap.addMarker(new MarkerOptions().position(latLng).title(name).draggable(true));
                                     }
                                 });
                             }
@@ -276,21 +266,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         @Override
                                         public void onSuccess(Uri downloadUrl)
                                         {
-                                            urlList.add(downloadUrl);
                                             System.out.println(downloadUrl);
                                             String name = String.valueOf(downloadUrl);
-                                            markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
+                                            mMap.addMarker(new MarkerOptions().position(picLatLng).title(name));
                                         }
                                     });
                                 }
                             });
-                            pictureUri.add(selectedImageUri);
                         }
                     }catch (NullPointerException j){
                         j.printStackTrace();
                         Toast toast = Toast.makeText(getApplicationContext(), "Dette billede har ingen GPS data søg efter lokation", Toast.LENGTH_SHORT);
                         toast.show();
-                        pictureUri.add(selectedImageUri);
                         noGPS = true;
                     }
                 } catch (IOException e) {
@@ -314,19 +301,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         @Override
-        public View getInfoWindow(Marker marker) {
+        public View getInfoWindow(@NonNull Marker marker) {
             render(marker, mWindow);
             return mWindow;
         }
 
         @Override
-        public View getInfoContents(Marker marker) {
+        public View getInfoContents(@NonNull Marker marker) {
             render(marker, mContents);
             return mContents;
         }
 
         private void render(Marker marker, View view) {
-            Uri badge;
             // Use the equals() method on a Marker to check for equals.  Do not use ==.
             if (marker.getTitle().equals("searchMarker")) {
                 Toast toast = Toast.makeText(getApplicationContext(), "Du har trykket på searchmarkeren", Toast.LENGTH_SHORT);
@@ -346,7 +332,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
         mMap.setOnInfoWindowClickListener(this);
@@ -360,11 +346,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void onSuccess(ListResult listResult) {
                         for (StorageReference item : listResult.getItems()) {
                             // All the items under listRef.
-                            System.out.println(String.valueOf(item));
+                            System.out.println(item);
                             item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
                                 @Override
                                 public void onSuccess(StorageMetadata storageMetadata) {
-                                    LatLng picLatLng = new LatLng(Double.parseDouble(storageMetadata.getCustomMetadata("lat")), Double.parseDouble(storageMetadata.getCustomMetadata("lng")));
+                                    LatLng picLatLng = new LatLng(Double.parseDouble(Objects.requireNonNull(storageMetadata.getCustomMetadata("lat"))), Double.parseDouble(Objects.requireNonNull(storageMetadata.getCustomMetadata("lng"))));
                                     item.getDownloadUrl().addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception exception) {
@@ -377,7 +363,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         public void onSuccess(Uri downloadUrl)
                                         {
                                             String name = String.valueOf(downloadUrl);
-                                            markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
+                                            mMap.addMarker(new MarkerOptions().position(picLatLng).title(name));
                                         }
                                     });
                                 }
@@ -407,7 +393,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onInfoWindowClick(Marker marker) {
+    public void onInfoWindowClick(@NonNull Marker marker) {
         if(user.getUid().equals(imagesRef.getName())){
             getSupportFragmentManager().beginTransaction().add(R.id.frameLayout3, new BlankFragment(marker.getTitle())).commit();
         }else{
