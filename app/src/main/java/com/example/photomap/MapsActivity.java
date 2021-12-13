@@ -343,15 +343,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .addOnSuccessListener(new OnSuccessListener<ListResult>() {
                     @Override
                     public void onSuccess(ListResult listResult) {
-                        for (StorageReference prefix : listResult.getPrefixes()) {
-                            // All the prefixes under listRef.
-                            // You may call listAll() recursively on them.
-                            System.out.println(prefix);
-                            prefix.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                        for (StorageReference item : listResult.getItems()) {
+                            // All the items under listRef.
+                            System.out.println(String.valueOf(item));
+                            item.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
                                 @Override
                                 public void onSuccess(StorageMetadata storageMetadata) {
                                     LatLng picLatLng = new LatLng(Double.parseDouble(storageMetadata.getCustomMetadata("lat")), Double.parseDouble(storageMetadata.getCustomMetadata("lng")));
-                                    prefix.getDownloadUrl().addOnFailureListener(new OnFailureListener() {
+                                    item.getDownloadUrl().addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception exception) {
                                             Toast toast = Toast.makeText(getApplicationContext(), "url kunnne ikke findes", Toast.LENGTH_SHORT);
@@ -370,24 +369,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception exception) {
-                                    Toast toast = Toast.makeText(getApplicationContext(), "Problemer med at hente data fra server", Toast.LENGTH_SHORT);
+                                    Toast toast = Toast.makeText(getApplicationContext(), "Problemer med at hente metadata fra server", Toast.LENGTH_SHORT);
                                     toast.show();
                                 }
                             });
                         }
-
-                        for (StorageReference item : listResult.getItems()) {
-                            // All the items under listRef.
-                        }
                     }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast toast = Toast.makeText(getApplicationContext(), "Problemer med at hente data fra server", Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                });
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast toast = Toast.makeText(getApplicationContext(), "Problemer med at hente data fra server", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
     }
 
     @Override
