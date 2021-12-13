@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 
@@ -12,6 +13,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -35,9 +37,9 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private final int SELECT_IMAGE = 1;
     private ArrayList<Uri> pictureUri;
     private ArrayList<Marker> markerList;
+    private ArrayList<Uri> urlList;
     SearchView searchView;
     Button minknap;
     double latFinal;
@@ -67,10 +70,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // dette skal måske byttes ud da det gør vores app onresponciv
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+
+
         com.example.photomap.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         pictureUri = new ArrayList<>();
         markerList = new ArrayList<>();
+        urlList = new ArrayList<Uri>();
         searchView = findViewById(R.id.idSearchView);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -108,9 +118,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         searchMarker.remove();
                     }
                     if(noGPS) {
-                        String name = String.valueOf(pictureUri.size() - 1);
                         noGPS = false;
-                        markerList.add(mMap.addMarker(new MarkerOptions().position(latLng).title(name).draggable(true)));
                         StorageReference picFromUser = imagesRef.child(selectedImageUri.getLastPathSegment());
                         StorageMetadata metadata = new StorageMetadata.Builder()
                                 .setContentType("image/jpg")
@@ -131,8 +139,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                 Toast toast = Toast.makeText(getApplicationContext(), "upload er lykkedes", Toast.LENGTH_SHORT);
                                 toast.show();
+                                picFromUser.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>()
+                                {
+                                    @Override
+                                    public void onSuccess(Uri downloadUrl)
+                                    {
+                                        urlList.add(downloadUrl);
+                                        String name = String.valueOf(downloadUrl);
+                                        markerList.add(mMap.addMarker(new MarkerOptions().position(latLng).title(name).draggable(true)));
+                                    }
+                                });
                             }
                         });
+
                     }else{
                         searchMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("searchMarker"));
                     }
@@ -211,8 +230,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             lngFinal = eDegree / eDegreeDenumurator + (eMinute / 60) / eMinuteDenumurator + (eSecond / 3600) / eSecondDenumurator;
                             System.out.println(lngFinal);
                             LatLng picLatLng = new LatLng(latFinal, lngFinal);
-                            String name = String.valueOf(pictureUri.size());
-                            markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(picLatLng, 14.0f));
                             StorageMetadata metadata = new StorageMetadata.Builder()
                                     .setContentType("image/jpg")
@@ -233,6 +250,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                                     Toast toast = Toast.makeText(getApplicationContext(), "upload er lykkedes", Toast.LENGTH_SHORT);
                                     toast.show();
+                                    picFromUser.getDownloadUrl().addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception exception) {
+                                            Toast toast = Toast.makeText(getApplicationContext(), "Url kunne ikke findes", Toast.LENGTH_SHORT);
+                                            toast.show();
+                                        }
+                                    }).addOnSuccessListener(new OnSuccessListener<Uri>()
+                                    {
+                                        @Override
+                                        public void onSuccess(Uri downloadUrl)
+                                        {
+                                            urlList.add(downloadUrl);
+                                            System.out.println(downloadUrl);
+                                            String name = String.valueOf(downloadUrl);
+                                            markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
+                                        }
+                                    });
                                 }
                             });
                             pictureUri.add(selectedImageUri);
@@ -284,8 +318,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 toast.show();
                 ((ImageView) view.findViewById(R.id.badge)).setImageURI(null);
             }else {
-                badge = pictureUri.get(Integer.parseInt(marker.getTitle()));
-                ((ImageView) view.findViewById(R.id.badge)).setImageURI(badge);
+                String url = marker.getTitle();
+                try {
+                    InputStream is = (InputStream) new URL(url).getContent();
+                    Drawable d = Drawable.createFromStream(is, "src name");
+                    ((ImageView) view.findViewById(R.id.badge)).setImageDrawable(d);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -307,6 +347,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             // All the prefixes under listRef.
                             // You may call listAll() recursively on them.
                             System.out.println(prefix);
+                            prefix.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                                @Override
+                                public void onSuccess(StorageMetadata storageMetadata) {
+                                    LatLng picLatLng = new LatLng(Double.parseDouble(storageMetadata.getCustomMetadata("lat")), Double.parseDouble(storageMetadata.getCustomMetadata("lng")));
+                                    prefix.getDownloadUrl().addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception exception) {
+                                            Toast toast = Toast.makeText(getApplicationContext(), "url kunnne ikke findes", Toast.LENGTH_SHORT);
+                                            toast.show();
+                                        }
+                                    }).addOnSuccessListener(new OnSuccessListener<Uri>()
+                                    {
+                                        @Override
+                                        public void onSuccess(Uri downloadUrl)
+                                        {
+                                            String name = String.valueOf(downloadUrl);
+                                            markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
+                                        }
+                                    });
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    Toast toast = Toast.makeText(getApplicationContext(), "Problemer med at hente data fra server", Toast.LENGTH_SHORT);
+                                    toast.show();
+                                }
+                            });
                         }
 
                         for (StorageReference item : listResult.getItems()) {
