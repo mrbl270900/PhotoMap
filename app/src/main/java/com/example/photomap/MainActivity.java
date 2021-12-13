@@ -113,12 +113,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast toast = Toast.makeText(getApplicationContext(), "KortId skal være 28 karaktere", Toast.LENGTH_SHORT);
                     toast.show();
                 }
-            }else if(v == minknap5){
-                input.setText(user.getUid());
             }else{
                 Toast toast = Toast.makeText(getApplicationContext(), "Log ind for at se kortet", Toast.LENGTH_SHORT);
                 toast.show();
             }
+        }else if(v == minknap5){
+            System.out.println("her");
+            input.setText(user.getUid());
         }
     }
 
