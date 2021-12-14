@@ -50,7 +50,6 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
             storageReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
-                    getActivity().getFragmentManager().popBackStack();
                     m.removeMarker(url);
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -59,6 +58,7 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
                     System.out.println("fail");
                 }
             });
+            this.getFragmentManager().beginTransaction().remove(this).commit();
         }
     }
 }

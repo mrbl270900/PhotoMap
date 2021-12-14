@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
