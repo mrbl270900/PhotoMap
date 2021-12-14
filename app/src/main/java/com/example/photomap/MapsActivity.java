@@ -59,6 +59,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double latFinal;
     double lngFinal;
     boolean noGPS = false;
+    boolean ditKort = false;
     Uri selectedImageUri;
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef = storage.getReference();
@@ -86,6 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 imagesRef = storageRef.child(sharedText);
             }
         }else{
+            ditKort = true;
             imagesRef = storageRef.child(user.getUid());
         }
 
@@ -182,6 +184,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onClick(View v) {
         if(v == minknap) {
+            if(ditKort == true) {
                 Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 getIntent.setType("image/*");
 
@@ -189,9 +192,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 pickIntent.setType("image/*");
 
                 Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[]{pickIntent});
 
                 startActivityForResult(chooserIntent, SELECT_IMAGE);
+            }else{
+                Toast toast = Toast.makeText(getApplicationContext(), "Du kan ikke ligge billeder op på andres kort", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }
     }
 
