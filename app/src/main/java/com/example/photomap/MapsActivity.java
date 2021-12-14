@@ -46,7 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener, View.OnClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener, View.OnClickListener, GoogleMap.OnMarkerDragListener {
 
     private GoogleMap mMap;
     private static final LatLng RUC = new LatLng(55.652330724, 12.137999448);
@@ -138,6 +138,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 .setContentType("image/jpg")
                                 .setCustomMetadata("lng", String.valueOf(address.getLongitude()))
                                 .setCustomMetadata("lat", String.valueOf(address.getLatitude()))
+                                .setCustomMetadata("drag", "true")
                                 .build();
                         UploadTask uploadTask = picFromUser.putFile(selectedImageUri, metadata);
 
@@ -253,6 +254,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     .setContentType("image/jpg")
                                     .setCustomMetadata("lng", String.valueOf(lngFinal))
                                     .setCustomMetadata("lat", String.valueOf(latFinal))
+                                    .setCustomMetadata("drag", "false")
                                     .build();
                             UploadTask uploadTask = picFromUser.putFile(selectedImageUri, metadata);
 
@@ -298,6 +300,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         }
+    }
+
+    @Override
+    public void onMarkerDrag(@NonNull Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDragEnd(@NonNull Marker marker) {
+        LatLng pos = marker.getPosition();
+        StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(marker.getTitle());
+        StorageMetadata metadata = new StorageMetadata.Builder()
+                .setContentType("image/jpg")
+                .setCustomMetadata("lng", String.valueOf(pos.longitude))
+                .setCustomMetadata("lat", String.valueOf(pos.latitude))
+                .setCustomMetadata("drag", "true")
+                .build();
+        storageReference.updateMetadata(metadata)
+                .addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                    @Override
+                    public void onSuccess(StorageMetadata storageMetadata) {
+                        Toast toast = Toast.makeText(getApplicationContext(), "Opdatere gps data", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        System.out.println("fejl");
+                    }
+                });
+    }
+
+    @Override
+    public void onMarkerDragStart(@NonNull Marker marker) {
+
     }
 
     class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
@@ -349,6 +387,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
         mMap.setOnInfoWindowClickListener(this);
+        mMap.setOnMarkerDragListener(this);
         float zoomLevel = 14.0f;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RUC, zoomLevel));
         mMap.setOnMarkerClickListener(this);
@@ -375,7 +414,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         public void onSuccess(Uri downloadUrl)
                                         {
                                             String name = String.valueOf(downloadUrl);
-                                            markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
+                                            if(storageMetadata.getCustomMetadata("drag").equals("true")) {
+                                                markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name).draggable(true)));
+                                            }else{
+                                                markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
+                                            }
                                         }
                                     });
                                 }
@@ -403,6 +446,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         marker.showInfoWindow();
         return true;
     }
+
+
 
     @Override
     public void onInfoWindowClick(@NonNull Marker marker) {
