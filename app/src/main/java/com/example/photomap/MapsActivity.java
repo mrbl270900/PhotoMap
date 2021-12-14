@@ -528,19 +528,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
                             });
                         }
-                        if (markerList.size() != 0) {
-                            System.out.println("zoom");
-                            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                            for (int i = 0; i > markerList.size(); i++) {
-                                builder.include(markerList.get(i).getPosition());
-                            }
-                            LatLngBounds bounds = builder.build();
-                            int padding = 0; // offset from edges of the map in pixels
-                            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                            googleMap.animateCamera(cu);
-                        } else {
-                            System.out.println("nozoom");
-                        }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
