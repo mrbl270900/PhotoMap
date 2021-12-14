@@ -41,6 +41,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,6 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng latLng;
     private Marker searchMarker;
     private final int SELECT_IMAGE = 1;
+    private ArrayList <Marker> markerList;
     SearchView searchView;
     Button minknap;
     double latFinal;
@@ -72,6 +74,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // dette skal måske byttes ud da det gør vores app onresponciv
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
+        markerList = new ArrayList<>();
+
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
@@ -151,7 +156,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     public void onSuccess(Uri downloadUrl)
                                     {
                                         String name = String.valueOf(downloadUrl);
-                                        mMap.addMarker(new MarkerOptions().position(latLng).title(name).draggable(true));
+                                        markerList.add(mMap.addMarker(new MarkerOptions().position(latLng).title(name).draggable(true)));
                                     }
                                 });
                             }
@@ -268,7 +273,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         {
                                             System.out.println(downloadUrl);
                                             String name = String.valueOf(downloadUrl);
-                                            mMap.addMarker(new MarkerOptions().position(picLatLng).title(name));
+                                            markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
                                         }
                                     });
                                 }
@@ -339,7 +344,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         float zoomLevel = 14.0f;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RUC, zoomLevel));
         mMap.setOnMarkerClickListener(this);
-        System.out.println("her");
         imagesRef.listAll()
                 .addOnSuccessListener(new OnSuccessListener<ListResult>() {
                     @Override
@@ -363,7 +367,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         public void onSuccess(Uri downloadUrl)
                                         {
                                             String name = String.valueOf(downloadUrl);
-                                            mMap.addMarker(new MarkerOptions().position(picLatLng).title(name));
+                                            markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
                                         }
                                     });
                                 }
@@ -395,10 +399,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onInfoWindowClick(@NonNull Marker marker) {
         if(user.getUid().equals(imagesRef.getName())){
-            getSupportFragmentManager().beginTransaction().add(R.id.frameLayout3, new BlankFragment(marker.getTitle())).commit();
+            getSupportFragmentManager().beginTransaction().add(R.id.frameLayout3, new BlankFragment(marker.getTitle(), this)).commit();
         }else{
             Toast toast = Toast.makeText(getApplicationContext(), "Du ejer ikke dette kort", Toast.LENGTH_SHORT);
             toast.show();
+        }
+    }
+
+    public void removeMarker(String title){
+        for (int i = 0; i < markerList.size(); i++) {
+            if(markerList.get(i).getTitle().equals(title)){
+                markerList.get(i).remove();
+                break;
+            }
         }
     }
 }

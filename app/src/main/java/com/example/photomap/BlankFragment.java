@@ -21,12 +21,11 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
     View view;
     String url;
     Button sletKnap;
-    FirebaseStorage storage = FirebaseStorage.getInstance();
-    StorageReference storageRef = storage.getReference();
+    MapsActivity m;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    StorageReference imagesRef = storageRef.child(user.getUid());
-    public BlankFragment(String title) {
+    public BlankFragment(String title, MapsActivity mapsActivity) {
         url = title;
+        m = mapsActivity;
     }
 
     @Override
@@ -47,16 +46,17 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         if(view == sletKnap){
-            System.out.println(url);
-            imagesRef.child(url).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(url);
+            storageReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     getActivity().getFragmentManager().popBackStack();
+                    m.removeMarker(url);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
-                    // Uh-oh, an error occurred!
+                    System.out.println("fail");
                 }
             });
         }
