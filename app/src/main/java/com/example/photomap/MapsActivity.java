@@ -22,11 +22,13 @@ import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
@@ -485,8 +487,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnInfoWindowClickListener(this);
         mMap.setOnMarkerDragListener(this);
         mMap.setOnCameraMoveListener(this);
-        float zoomLevel = 14.0f;
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RUC, zoomLevel));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RUC, 14.0f));
         mMap.setOnMarkerClickListener(this);
         imagesRef.listAll()
                 .addOnSuccessListener(new OnSuccessListener<ListResult>() {
@@ -505,19 +506,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             Toast toast = Toast.makeText(getApplicationContext(), "url kunnne ikke findes", Toast.LENGTH_SHORT);
                                             toast.show();
                                         }
-                                    }).addOnSuccessListener(new OnSuccessListener<Uri>()
-                                    {
+                                    }).addOnSuccessListener(new OnSuccessListener<Uri>() {
                                         @Override
-                                        public void onSuccess(Uri downloadUrl)
-                                        {
+                                        public void onSuccess(Uri downloadUrl) {
                                             String name = String.valueOf(downloadUrl);
-                                            if(storageMetadata.getCustomMetadata("drag").equals("true")) {
+                                            if (storageMetadata.getCustomMetadata("drag").equals("true")) {
                                                 markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name).draggable(true)));
-                                            }else{
+                                            } else {
                                                 markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
                                             }
+                                            System.out.println("marker");
                                         }
                                     });
+
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -526,6 +527,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     toast.show();
                                 }
                             });
+                        }
+                        if (markerList.size() != 0) {
+                            System.out.println("zoom");
+                            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                            for (int i = 0; i > markerList.size(); i++) {
+                                builder.include(markerList.get(i).getPosition());
+                            }
+                            LatLngBounds bounds = builder.build();
+                            int padding = 0; // offset from edges of the map in pixels
+                            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                            googleMap.animateCamera(cu);
+                        } else {
+                            System.out.println("nozoom");
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
