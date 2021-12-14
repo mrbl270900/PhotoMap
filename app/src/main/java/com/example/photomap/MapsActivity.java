@@ -515,10 +515,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             } else {
                                                 markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
                                             }
-                                            System.out.println("marker");
                                         }
                                     });
-
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -536,6 +534,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 toast.show();
             }
         });
+        if (markerList.size() != 0) {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (int i = 0; i > markerList.size(); i++) {
+                builder.include(markerList.get(i).getPosition());
+                System.out.println("her");
+            }
+            LatLngBounds bounds = builder.build();
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 50);
+            mMap.animateCamera(cu);
+        }
     }
 
     @Override
