@@ -46,7 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener, View.OnClickListener, GoogleMap.OnMarkerDragListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener, View.OnClickListener, GoogleMap.OnMarkerDragListener, GoogleMap.OnCameraMoveListener {
 
     private GoogleMap mMap;
     private static final LatLng RUC = new LatLng(55.652330724, 12.137999448);
@@ -61,6 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     double lngFinal;
     boolean noGPS = false;
     boolean ditKort = false;
+    private BlankFragment blank;
     Uri selectedImageUri;
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageRef = storage.getReference();
@@ -77,6 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+        blank = new BlankFragment(null, this);
         markerList = new ArrayList<>();
 
         Intent intent = getIntent();
@@ -338,6 +340,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public void onCameraMove() {
+            blank.close();
+    }
+
     class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
         // These are both viewgroups containing an ImageView with id "badge" and two TextViews with id
@@ -388,6 +396,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
         mMap.setOnInfoWindowClickListener(this);
         mMap.setOnMarkerDragListener(this);
+        mMap.setOnCameraMoveListener(this);
         float zoomLevel = 14.0f;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(RUC, zoomLevel));
         mMap.setOnMarkerClickListener(this);
@@ -452,12 +461,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onInfoWindowClick(@NonNull Marker marker) {
         if(user.getUid().equals(imagesRef.getName())){
-            getSupportFragmentManager().beginTransaction().add(R.id.frameLayout3, new BlankFragment(marker.getTitle(), this)).commit();
+            getSupportFragmentManager().beginTransaction().add(R.id.frameLayout3, blank = new BlankFragment(marker.getTitle(), this)).commit();
         }else{
             Toast toast = Toast.makeText(getApplicationContext(), "Du ejer ikke dette kort", Toast.LENGTH_SHORT);
             toast.show();
         }
     }
+
+
+
 
     public void removeMarker(String title){
         for (int i = 0; i < markerList.size(); i++) {

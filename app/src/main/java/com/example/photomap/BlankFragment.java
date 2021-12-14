@@ -22,6 +22,7 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
     String url;
     Button sletKnap;
     MapsActivity m;
+    boolean open = false;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     public BlankFragment(String title, MapsActivity mapsActivity) {
         url = title;
@@ -40,6 +41,7 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
         view = inflater.inflate(R.layout.fragment_blank, container, false);
         sletKnap = view.findViewById(R.id.button4);
         sletKnap.setOnClickListener(this);
+        open = true;
         return view;
     }
 
@@ -58,6 +60,13 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
                     System.out.println("fail");
                 }
             });
+            this.getFragmentManager().beginTransaction().remove(this).commit();
+        }
+    }
+
+    public void close(){
+        if(open == true) {
+            open = false;
             this.getFragmentManager().beginTransaction().remove(this).commit();
         }
     }
