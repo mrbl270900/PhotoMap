@@ -65,6 +65,7 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
                     System.out.println("fail");
                 }
             });
+            open = false;
             this.getFragmentManager().beginTransaction().remove(this).commit();
         }
     }
