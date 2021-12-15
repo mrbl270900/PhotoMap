@@ -12,8 +12,6 @@ import android.widget.Button;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -23,7 +21,6 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
     Button sletKnap;
     MapsActivity m;
     boolean open = false;
-    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     public BlankFragment(String title, MapsActivity mapsActivity) {
         url = title;
         m = mapsActivity;
@@ -65,7 +62,7 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
     }
 
     public void close(){
-        if(open == true) {
+        if(open) {
             open = false;
             this.getFragmentManager().beginTransaction().remove(this).commit();
         }

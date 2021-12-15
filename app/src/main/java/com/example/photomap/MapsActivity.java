@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
-import android.app.Fragment;
 import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -22,13 +21,11 @@ import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.photomap.databinding.ActivityMapsBinding;
@@ -56,7 +53,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String location;
     private LatLng latLng;
     private Marker searchMarker;
-    private final int SELECT_IMAGE = 1;
     private ArrayList <Marker> markerList;
     SearchView searchView;
     Button minknap;
@@ -534,16 +530,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 toast.show();
             }
         });
-        if (markerList.size() != 0) {
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            for (int i = 0; i > markerList.size(); i++) {
-                builder.include(markerList.get(i).getPosition());
-                System.out.println("her");
-            }
-            LatLngBounds bounds = builder.build();
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 50);
-            mMap.animateCamera(cu);
-        }
     }
 
     @Override
