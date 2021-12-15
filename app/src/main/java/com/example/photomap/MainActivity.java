@@ -27,14 +27,19 @@ import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    //her definere vi vores knapper og vores editText som er vores input i denne activity
     Button minknap;
     Button minknap2;
     Button minknap3;
     Button minknap4;
     Button minknap5;
     EditText input;
+    //her definere vi vores singletonList som bruges til vores log ind og log ud gennem firebase
     List<AuthUI.IdpConfig> providers = Collections.singletonList(new AuthUI.IdpConfig.GoogleBuilder().build());
 
+    //her starter vores pogram med at override onCreate som bliver sat i gang når activiteten først starter
+    //i denne funktion henter vi hvad vi skal se på skærmen og vores knapper bliver sat op
+    //her sætters vores input felt også op
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +62,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         input = findViewById(R.id.plain_text_input);
 
+
+        //her tjekker vi om vores bruger er logget ind og hvis de er sker der intet og hvis de ikke er
+        //sender vi dem til en log ind skærm
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             // User is signed in
@@ -70,10 +78,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //her nede overrider vi vores onClick funktion denne funktion bliver kaldt når brugeren kliker på en knap
     @Override
     public void onClick(View v){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        //her tjekker vi med if og if else statments hvilken knap brugeren har trykket på
         if(v == minknap){
+            //dette er skift til kort knappen som sender brugeren til deres eget kort hvis de er logget ind
+            //ellers får de en besked om at de skal logge ind
             if (user != null) {
                 startActivity(new Intent(MainActivity.this, MapsActivity.class));
             }else{
@@ -81,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 toast.show();
             }
         }else if(v == minknap2){
+            //dette er log ud knappen som kalder en firebase funktion der logger brugeren ud og når de er logget ud
+            //fortælles brugeren dette
             AuthUI.getInstance()
                     .signOut(this)
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -90,13 +104,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
         }else if(v == minknap3){
-            // Create and launch sign-in intent
+            //dette er log ind knappen denne sender brugeren til en log ind side
             Intent signInIntent = AuthUI.getInstance()
                     .createSignInIntentBuilder()
                     .setAvailableProviders(providers)
                     .build();
             signInLauncher.launch(signInIntent);
         }else if(v == minknap4){
+            //Denne kanp er til at gå til en andens kort ud fra et kortid i input feltet og hvis kortid
+            //er kortere eller længere end 28 chars så fortælles brugeren at den skal være 28 chars
+            //Brugeren skal også være logget ind for at se andres kort
             if (user != null) {
                 if(input.getText().toString().length()==28){
                     String mapID = input.getText().toString();
@@ -115,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 toast.show();
             }
         }else if(v == minknap5){
+            //denne knap henter dit UID som vi andvender til kortid og sætter det i input feltet hvis brugeren er logget ind
             if (user != null) {
                 input.setText(user.getUid());
             }else{
@@ -124,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
+    //dette er til log ind og ud for firebase
     // See: https://developer.android.com/training/basics/intents/result
     private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
             new FirebaseAuthUIActivityResultContract(),
