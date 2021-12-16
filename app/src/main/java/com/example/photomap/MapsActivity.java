@@ -328,7 +328,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     {
                         selectedImageUri = clipdata.getItemAt(i).getUri();
                         String selectedImagePath = selectedImageUri.getPath();
-                        System.out.println("Image Path : " + selectedImagePath);
                         StorageReference picFromUser = imagesRef.child(selectedImageUri.getLastPathSegment());
 
 
@@ -340,7 +339,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             String lngData = exif.getAttribute(lng);
                             try {
                                 if (!latData.equals(null)) {
-                                    System.out.println(latData);
                                     String convertetLatData = latData.replaceAll("/", ",");
                                     String[] latArray = convertetLatData.split(",");
                                     Double nDegree = Double.parseDouble(latArray[0]);
@@ -350,10 +348,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     Double nSecond = Double.parseDouble(latArray[4]);
                                     Double nSecondDenumurator = Double.parseDouble(latArray[5]);
                                     latFinal = nDegree / nDegreeDenumurator + (nMinute / 60) / nMinuteDenumurator + (nSecond / 3600) / nSecondDenumurator;
-                                    System.out.println(latFinal);
-                                }
+                                                                    }
                                 if (!lngData.equals(null)) {
-                                    System.out.println(lngData);
                                     String convertetLngData = lngData.replaceAll("/", ",");
                                     String[] lngArray = convertetLngData.split(",");
                                     Double eDegree = Double.parseDouble(lngArray[0]);
@@ -363,7 +359,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     Double eSecond = Double.parseDouble(lngArray[4]);
                                     Double eSecondDenumurator = Double.parseDouble(lngArray[5]);
                                     lngFinal = eDegree / eDegreeDenumurator + (eMinute / 60) / eMinuteDenumurator + (eSecond / 3600) / eSecondDenumurator;
-                                    System.out.println(lngFinal);
                                     LatLng picLatLng = new LatLng(latFinal, lngFinal);
                                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(picLatLng, 14.0f));
                                     StorageMetadata metadata = new StorageMetadata.Builder()
