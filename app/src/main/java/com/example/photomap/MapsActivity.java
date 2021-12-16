@@ -395,7 +395,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                             }).addOnSuccessListener(new OnSuccessListener<Uri>() {
                                                 @Override
                                                 public void onSuccess(Uri downloadUrl) {
-                                                    System.out.println(downloadUrl);
                                                     String name = String.valueOf(downloadUrl);
                                                     markerList.add(mMap.addMarker(new MarkerOptions().position(picLatLng).title(name)));
                                                 }

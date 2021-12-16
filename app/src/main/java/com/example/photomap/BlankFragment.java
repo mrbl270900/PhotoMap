@@ -70,7 +70,7 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-
+    
     //denne funktion lukker fragmentet hvis open er sand
     public void close(){
         if(open) {
